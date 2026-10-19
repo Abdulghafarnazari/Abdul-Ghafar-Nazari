@@ -1,0 +1,363 @@
+Name : Abdul Ghafar Nazari 
+F.Name: Abdul Wakil
+DEP : IT 
+Num : 20 
+
+C:\Users\Abdul.PC\it-auth-lab\resources\views\auth
+C:\Users\Abdul.PC\it-auth-lab\resources\views\auth\login.blade.php
+C:\Users\Abdul.PC\it-auth-lab\resources\views\auth\register.blade.php
+C:\Users\Abdul.PC\it-auth-lab\resources\views\dashboard.blade.php
+C:\Users\Abdul.PC\it-auth-lab\resources\views\welcome.blade.php
+
+login.blade.php: [
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - IT Student Portal</title>
+</head>
+<body>
+    <h1>Login</h1>
+
+    @if ($errors->any())
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    @endif
+
+    @if (session('success'))
+        <p>{{ session('success') }}</p>
+    @endif
+
+    <form method="POST" action="{{ route('login.store') }}">
+        @csrf
+
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email"
+               value="{{ old('email') }}" required>
+        <br><br>
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required>
+        <br><br>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <p>
+        <a href="{{ route('register') }}">Create an account</a>
+    </p>
+</body>
+</html>
+]
+
+
+
+
+register.blade.php   :    [
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - IT Student Portal</title>
+</head>
+<body>
+    <h1>Create an account</h1>
+
+    @if ($errors->any())
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    @endif
+
+    @if (session('success'))
+        <p>{{ session('success') }}</p>
+    @endif
+
+    <form method="POST" action="{{ route('register.store') }}">
+        @csrf
+
+        <label for="name">Full name</label>
+        <input id="name" name="name" type="text"
+               value="{{ old('name') }}" required>
+        <br><br>
+
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email"
+               value="{{ old('email') }}" required>
+        <br><br>
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password"
+               minlength="8" required>
+        <br><br>
+
+        <label for="password_confirmation">Confirm password</label>
+        <input id="password_confirmation"
+               name="password_confirmation"
+               type="password" minlength="8" required>
+        <br><br>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <p>
+        <a href="{{ route('login') }}">Already have an account?</a>
+    </p>
+</body>
+</html>
+]
+
+
+
+
+dashboard.blade.php    : [ 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - IT Student Portal</title>
+</head>
+<body>
+    <h1>IT Student Portal</h1>
+
+    <p>Welcome, {{ auth()->user()->name }}.</p>
+    <p>Email: {{ auth()->user()->email }}</p>
+
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button type="submit">Logout</button>
+    </form>
+</body>
+</html>
+]
+
+
+
+.env         :        [ 
+APP_NAME=Laravel
+APP_ENV=local
+APP_KEY=base64:FajAFWgykm/dOFb9xa7xWf3uHmw4RagVCFVbrgDzY+U=
+APP_DEBUG=true
+APP_URL=http://localhost
+
+APP_LOCALE=en
+APP_FALLBACK_LOCALE=en
+APP_FAKER_LOCALE=en_US
+
+APP_MAINTENANCE_DRIVER=file
+# APP_MAINTENANCE_STORE=database
+
+# PHP_CLI_SERVER_WORKERS=4
+
+BCRYPT_ROUNDS=12
+
+LOG_CHANNEL=stack
+LOG_STACK=single
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=it_auth_lab
+DB_USERNAME=root
+DB_PASSWORD=
+
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+SESSION_ENCRYPT=false
+SESSION_PATH=/
+SESSION_DOMAIN=null
+
+BROADCAST_CONNECTION=log
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=database
+
+CACHE_STORE=database
+# CACHE_PREFIX=
+
+MEMCACHED_HOST=127.0.0.1
+
+REDIS_CLIENT=phpredis
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+MAIL_MAILER=log
+MAIL_SCHEME=null
+MAIL_HOST=127.0.0.1
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_FROM_ADDRESS="hello@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=
+AWS_USE_PATH_STYLE_ENDPOINT=false
+
+VITE_APP_NAME="${APP_NAME}"
+]
+
+
+C:\Users\Abdul.PC\it-auth-lab\routes
+
+
+
+web.php:    [
+
+<?php
+
+use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Route;
+
+Route::redirect('/', '/login');
+
+Route::middleware('guest')->group(function () {
+    Route::view('/register', 'auth.register')->name('register');
+
+    Route::post('/register', [AuthController::class, 'register'])
+        ->name('register.store');
+
+    Route::view('/login', 'auth.login')->name('login');
+
+    Route::post('/login', [AuthController::class, 'login'])
+        ->name('login.store');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
+    Route::post('/logout', [AuthController::class, 'logout'])
+        ->name('logout');
+});
+]
+
+
+
+
+
+C:\Users\Abdul.PC\it-auth-lab\app\Http\Controllers\AuthController.php
+
+
+AuthController.php :    [
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+
+class AuthController extends Controller
+{
+    public function register(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = new User();
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+        $user->password = Hash::make($data['password']);
+        $user->save();
+
+        return redirect()->route('login')
+            ->with('success', 'Account created. Please log in.');
+    }
+
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        if (! Auth::attempt($credentials)) {
+            return back()->withErrors([
+                'email' => 'Email or password is incorrect.',
+            ])->onlyInput('email');
+        }
+
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('dashboard'));
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
+    }
+}
+]
+
+
+Controller.php          :                [
+<?php
+
+namespace App\Http\Controllers;
+
+abstract class Controller
+{
+    //
+}
+]    
+
+
+
+
+
+
+
+php artisan tinker --execute="dump(App\Models\User::select('id','name','email','password')->get()->toArray());"  
+
+
+
+PS C:\Users\Abdul.PC\it-auth-lab> php artisan tinker --execute="dump(App\Models\User::all()->makeVisible('password')->map->only(['id','email','password'])->toArray());"
+
+array:4 [
+  0 => array:3 [
+    "id" => 1
+    "email" => "a@gmail.com"
+    "password" => "$2y$12$mBpOsqH60/eCAOa9kClZde1FhGrwWpR40W8rBqqd/KGWKfCU1tAy6"
+  ]
+  1 => array:3 [
+    "id" => 2
+    "email" => "b@gamil.com"
+    "password" => "$2y$12$TaQ2Jk1.8AmSpEhEKIMHMuxSPpJz6Yk41XsWcBJ2YCbhNZUIDnUki"
+  ]
+  2 => array:3 [
+    "id" => 3
+    "email" => "b@gmail.com"
+    "password" => "$2y$12$yvkQMkP41BgjdGvcOfy82.CthwlK4nEx1MgV3stpkQUwW8D0udjme"
+  ]
+  3 => array:3 [
+    "id" => 4
+    "email" => "test@gmail.com"
+    "password" => "$2y$12$z9GDJI7kdVizxDKtYQeiguGCju7kXxrDN4GATxxI4bQEk7EMdDO/i"
+  ]
+] // vendor\psy\psysh\src\ExecutionClosure.php(41) : eval()'d code:1
+PS C:\Users\Abdul.PC\it-auth-lab>
