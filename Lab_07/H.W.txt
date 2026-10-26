@@ -6,4 +6,245 @@ Num. : 20
 
 
 
-teacher i don't see to be required  any thing else to paste the codes of my project. because the codes are seperate into many files in the laravel folder.
+teacher i don't see to be required  any thing else to paste the codes of my project.
+because the codes are seperate into many files in the laravel folder.
+BookController.php    :   [
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Book;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class BookController extends Controller
+{
+    // show the dashboard with only the logged-in user's books
+    public function index()
+    {
+        // newest books first, and only the ones this user added
+        $books = Book::where('user_id', Auth::id())
+                     ->latest()
+                     ->get();
+
+        return view('dashboard', compact('books'));
+    }
+
+    // validate the form and save a new book
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title'  => 'required|string|max:150',
+            'author' => 'required|string|max:100',
+            'pages'  => 'required|integer|min:1|max:10000',
+        ]);
+
+        // the user id comes from the session, not from the form
+        $validated['user_id'] = Auth::id();
+
+        Book::create($validated);
+
+        return redirect()->route('dashboard')
+                         ->with('success', 'Book added successfully.');
+    }
+}
+
+]
+
+
+
+dashBoard.blade.php    :     <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IT Student Portal</title>
+
+    {{-- bootstrap from CDN, no install needed --}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+
+    {{-- top bar: welcome text + logout --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">IT Student Portal</h1>
+            <small class="text-muted">
+                Welcome, {{ auth()->user()->name }} ({{ auth()->user()->email }})
+            </small>
+        </div>
+
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="btn btn-outline-danger">Logout</button>
+        </form>
+    </div>
+
+    {{-- success message after saving a book --}}
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+
+    {{-- validation errors --}}
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    {{-- register a book --}}
+    <div class="card mb-4">
+        <div class="card-header">Register a Book</div>
+        <div class="card-body">
+            <form method="POST" action="{{ route('books.store') }}">
+                @csrf
+
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input id="title" name="title" type="text"
+                           class="form-control @error('title') is-invalid @enderror"
+                           value="{{ old('title') }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="author" class="form-label">Author</label>
+                    <input id="author" name="author" type="text"
+                           class="form-control @error('author') is-invalid @enderror"
+                           value="{{ old('author') }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="pages" class="form-label">Pages</label>
+                    <input id="pages" name="pages" type="number" min="1" max="10000"
+                           class="form-control @error('pages') is-invalid @enderror"
+                           value="{{ old('pages') }}" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Add Book</button>
+            </form>
+        </div>
+    </div>
+
+    {{-- my books table --}}
+    <div class="card">
+        <div class="card-header">My Books</div>
+        <div class="card-body">
+            @if ($books->isEmpty())
+                <p class="text-muted mb-0">You have not added any books yet.</p>
+            @else
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Pages</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($books as $book)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $book->title }}</td>
+                                <td>{{ $book->author }}</td>
+                                <td>{{ $book->pages }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
+
+
+
+web.php    :      <?php
+
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BookController;
+use Illuminate\Support\Facades\Route;
+
+Route::redirect('/', '/login');
+
+// only visitors who are NOT logged in
+Route::middleware('guest')->group(function () {
+    Route::view('/register', 'auth.register')->name('register');
+    Route::post('/register', [AuthController::class, 'register'])
+        ->name('register.store');
+
+    Route::view('/login', 'auth.login')->name('login');
+    Route::post('/login', [AuthController::class, 'login'])
+        ->name('login.store');
+});
+
+// only logged-in users
+Route::middleware('auth')->group(function () {
+    // the old closure dashboard route is replaced by the controller
+    Route::get('/dashboard', [BookController::class, 'index'])
+        ->name('dashboard');
+
+    Route::post('/books', [BookController::class, 'store'])
+        ->name('books.store');
+
+    Route::post('/logout', [AuthController::class, 'logout'])
+        ->name('logout');
+});
+
+
+
+
+
+
+C:\Users\Abdul.PC\it-auth-lab\database\migrations\2026_10_26_043443_create_books_table.php   :     [
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+public function up(): void
+{
+    Schema::create('books', function (Blueprint $table) {
+        $table->id();
+
+        $table->foreignId('user_id')
+              ->constrained()
+              ->cascadeOnDelete();
+
+        $table->string('title', 150);
+        $table->string('author', 100);
+        $table->unsignedInteger('pages');
+
+        $table->timestamps();
+    });
+}
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('books');
+    }
+};
+
+
+]
+
+
