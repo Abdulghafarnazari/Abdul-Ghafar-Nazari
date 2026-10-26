@@ -1,1 +1,10 @@
+Name : Abdul Ghafar Nazari 
+F.Name : Abdul Wakil
+DEP : IT
+Num. : 20
 
+
+
+
+teacher i don't need any thing else to paste the codes of my project. because the codes are seperate into many files in 
+the laravel folder.
