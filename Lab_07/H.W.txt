@@ -6,5 +6,4 @@ Num. : 20
 
 
 
-teacher i don't need any thing else to paste the codes of my project. because the codes are seperate into many files in 
-the laravel folder.
+teacher i don't see to be required  any thing else to paste the codes of my project. because the codes are seperate into many files in the laravel folder.
